@@ -2,18 +2,19 @@
 - name: "Test de connexion SSH avec le Switch Cisco"
   hosts: switch-tete
   gather_facts: no
-  connection: ansible.builtin.ssh
-  
+  connection: ansible.netcommon.network_cli
+
   tasks:
-    - name: Test
+    - name: Test de validation locale
       ansible.builtin.debug:
-        msg: "Test"
+        msg: "Tentative de connexion avec le SSH Système d'AWX..."
+
     - name: Envoyer une commande de test au switch
       cisco.ios.ios_command:
         commands:
-          - show version | include System image file
+          - show version
       register: ssh_test
 
     - name: Afficher le résultat de la connexion
       ansible.builtin.debug:
-        msg: "Connexion SSH réussie ! Réponse du switch : {{ ssh_test.stdout[0] }}"
+        msg: "Connexion réussie ! Réponse du switch : {{ ssh_test.stdout[0] }}"
