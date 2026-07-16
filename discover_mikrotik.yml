@@ -1,31 +1,16 @@
 ---
-- name: Découverte automatique des MikroTik via le Switch Cisco
+- name: "Test de connexion SSH avec le Switch Cisco"
   hosts: switch-tete
   gather_facts: no
-  connection: local
+  connection: ansible.netcommon.network_cli
 
   tasks:
-    # 1 - LLDP
-    - name: Récupérer les voisins LLDP du switch Cisco
+    - name: Envoyer une commande de test au switch
       cisco.ios.ios_command:
         commands:
-          - show lldp neighbors detail
-      register: lldp_output
+          - show version | include System image file
+      register: ssh_test
 
-    # 2. Parsing Hôtes
-    - name: Parser les informations et ajouter les hôtes dans AWX
-      ansible.builtin.set_fact:
-        discovered_mikrotiks: "{{ lldp_output.stdout[0] | regex_findall('System Name: (\\S+).*?\\n.*?IPv4 Address: (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', multiline=True) }}"
-
-    # 3. Adding MK to AWX
-    - name: Enregistrer les nouveaux MikroTik dans AWX
-      awx.awx.host:
-        name: "{{ item[0] }}"
-        inventory: "Inventaire_Mikrotik" # Le nom de ton inventaire dans AWX
-        state: present
-        variables:
-          ansible_host: "{{ item[1] }}"
-          ansible_connection: ansible.netcommon.network_cli
-          ansible_network_os: community.routeros.routeros
-      loop: "{{ discovered_mikrotiks }}"
-      delegate_to: localhost
+    - name: Afficher le résultat de la connexion
+      ansible.builtin.debug:
+        msg: "Connexion SSH réussie ! Réponse du switch : {{ ssh_test.stdout[0] }}"
