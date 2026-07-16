@@ -1,18 +1,15 @@
 ---
-- name: "Test de connexion SSH Universel"
+- name: "Test de connexion SSH via Shell"
   hosts: switch-tete
   gather_facts: no
+  connection: local  # On exécute la commande DEPUIS le conteneur AWX
 
   tasks:
-    - name: Test de validation locale
-      ansible.builtin.debug:
-        msg: "Tentative de connexion via SSH standard (OpenSSH)..."
-
-    - name: Envoyer une commande de test au switch
-      ansible.netcommon.cli_command:
-        command: "show version"
+    - name: Tenter une connexion SSH directe via le client système
+      ansible.builtin.shell: >
+        sshpass -p "{{ ansible_password | default(ansible_ssh_pass) }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o KexAlgorithms=+diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1 -o HostKeyAlgorithms=+ssh-rsa {{ ansible_user | default(ansible_ssh_user) }}@{{ ansible_host }} "show version"
       register: ssh_test
 
     - name: Afficher le résultat de la connexion
       ansible.builtin.debug:
-        msg: "Connexion réussie ! Réponse du switch : {{ ssh_test.stdout }}"
+        var: ssh_test.stdout_lines
