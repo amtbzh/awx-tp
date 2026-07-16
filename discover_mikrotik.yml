@@ -7,13 +7,17 @@
   tasks:
     - name: Test de validation locale
       ansible.builtin.debug:
-        msg: "Tentative de connexion avec le SSH Système d'AWX..."
+        msg: "Tentative de contournement Kex avec Paramiko..."
 
     - name: Envoyer une commande de test au switch
       cisco.ios.ios_command:
         commands:
-          - show version
+          - show version | include System image file
       register: ssh_test
+      # On injecte les variables de contournement globales au niveau de la tâche
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: "false"
+        ANSIBLE_PARAMIKO_HOST_KEY_CHECKING: "false"
 
     - name: Afficher le résultat de la connexion
       ansible.builtin.debug:
