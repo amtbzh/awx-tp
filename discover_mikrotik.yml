@@ -6,7 +6,8 @@
   
   tasks:
     - name: Test
-        msg: "Test OK"
+      ansible.builtin.debug:
+        msg: "Test"
     - name: Envoyer une commande de test au switch
       cisco.ios.ios_command:
         commands:
