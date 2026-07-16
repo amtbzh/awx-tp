@@ -1,0 +1,19 @@
+---
+- name: Premier contact SSH et définition du mot de passe
+  hosts: localhost
+  gather_facts: false
+  vars:
+    target_ip: "192.168.88.1"
+    new_password: "{{ mikrotik_new_password }}"
+
+  tasks:
+    - name: Se connecter en SSH et répondre au prompt de mot de passe forcé
+      ansible.builtin.expect:
+        command: "ssh -o StrictHostKeyChecking=no admin@{{ target_ip }}"
+        responses:
+          "password:": ""
+          "new password.*:": "{{ new_password }}"
+          "repeat new password.*:": "{{ new_password }}"
+          "\\[admin@MikroTik\\] >": "/ip service enable api\r/quit\r"
+      register: expect_result
+      changed_when: true
