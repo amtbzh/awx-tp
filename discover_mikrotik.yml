@@ -1,13 +1,18 @@
 ---
 - name: "Test de connexion SSH via Shell"
-  hosts: switch-tete
+  hosts: localhost  # On reste en local sur AWX pour ne pas bloquer
   gather_facts: no
-  connection: local  # On exécute la commande DEPUIS le conteneur AWX
+
+  vars:
+    # On récupère l'IP configurée sur l'hôte "switch-tete" dans ton inventaire
+    target_host: "{{ hostvars['switch-tete']['ansible_host'] | default('10.200.171.101') }}"
+    # On récupère l'utilisateur d'AWX ou on met 'admin' par défaut
+    target_user: "{{ hostvars['switch-tete']['ansible_user'] | default('admin') }}"
 
   tasks:
-    - name: Tenter une connexion SSH directe via le client système
+    - name: Tenter la connexion SSH directe avec mot de passe dynamique
       ansible.builtin.shell: >
-        sshpass -p "{{ ansible_password | default(ansible_ssh_pass) }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o KexAlgorithms=+diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1 -o HostKeyAlgorithms=+ssh-rsa {{ ansible_user | default(ansible_ssh_user) }}@{{ ansible_host }} "show version"
+        sshpass -p "{{ ansible_password }}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o KexAlgorithms=+diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1 -o HostKeyAlgorithms=+ssh-rsa {{ target_user }}@{{ target_host }} "show version"
       register: ssh_test
 
     - name: Afficher le résultat de la connexion
