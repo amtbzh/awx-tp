@@ -1,24 +1,18 @@
 ---
-- name: "Test de connexion SSH avec le Switch Cisco"
+- name: "Test de connexion SSH Universel"
   hosts: switch-tete
   gather_facts: no
-  connection: ansible.netcommon.network_cli
 
   tasks:
     - name: Test de validation locale
       ansible.builtin.debug:
-        msg: "Tentative de contournement Kex avec Paramiko..."
+        msg: "Tentative de connexion via SSH standard (OpenSSH)..."
 
     - name: Envoyer une commande de test au switch
-      cisco.ios.ios_command:
-        commands:
-          - show version | include System image file
+      ansible.netcommon.cli_command:
+        command: "show version"
       register: ssh_test
-      # On injecte les variables de contournement globales au niveau de la tâche
-      environment:
-        ANSIBLE_HOST_KEY_CHECKING: "false"
-        ANSIBLE_PARAMIKO_HOST_KEY_CHECKING: "false"
 
     - name: Afficher le résultat de la connexion
       ansible.builtin.debug:
-        msg: "Connexion réussie ! Réponse du switch : {{ ssh_test.stdout[0] }}"
+        msg: "Connexion réussie ! Réponse du switch : {{ ssh_test.stdout }}"
