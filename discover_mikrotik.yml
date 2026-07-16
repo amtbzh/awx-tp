@@ -3,6 +3,15 @@
   hosts: switch-tete
   gather_facts: no
   connection: ansible.netcommon.network_cli
+  
+  # On force TOUTES les variables de contournement SSH directement ici
+  vars:
+    ansible_ssh_common_args: '-o KexAlgorithms=+diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1 -o HostKeyAlgorithms=+ssh-rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    ansible_ssh_transfer_method: piped
+    ansible_paramiko_interactive_driver_options:
+      key_exchange_algorithms:
+        - diffie-hellman-group14-sha1
+        - diffie-hellman-group-exchange-sha1
 
   tasks:
     - name: Envoyer une commande de test au switch
