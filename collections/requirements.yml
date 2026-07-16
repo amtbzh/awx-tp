@@ -1,6 +1,0 @@
----
-collections:
-  - name: cisco.ios
-  - name: ansible.netcommon
-  - name: awx.awx
-  - name: community.routeros
